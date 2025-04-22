@@ -17,7 +17,7 @@ let fadingRows = {}; // Track which rows are fading and how much they've faded
 let fadingRow = 1600; //bottom row
 
 function preload() {
-  img = loadImage('assets/delete.png');
+  img = loadImage('../assets/delete.png');
 }
 
 function setup() {
