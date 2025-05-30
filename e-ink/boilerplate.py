@@ -2,8 +2,9 @@
 # -*- coding:utf-8 -*-
 import sys
 import os
-assetdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'assets')
-libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'lib')
+basedir = os.path.dirname(os.path.realpath(__file__))
+assetdir = os.path.join(basedir, 'assets')
+libdir = os.path.join(basedir, 'lib')
 if os.path.exists(libdir):
     sys.path.append(libdir)
 
