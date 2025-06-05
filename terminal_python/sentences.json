@@ -1,39 +1,376 @@
-[
-  "What if the internet needs a nap, but we won't let it sleep?",
-  "We live in a game where everyone is told to keep everything.",
-  "Every file. Every memory. Every click and keystroke.",
-  "The Cloud says it will keep it all… forever.",
-  "But what use is forever if nobody will be there to see it?",
-  "Forever is an illusion. The Cloud is an illusion.",
-  "The Cloud is millions of overworked machines with a drinking problem, and it's mostly groundwater.",
-  "Store now. Regret later. Delete never.",
-  "Food for thought: what would you unshare, if you could?",
-  "A car and a book salesman flew around the earth shouting false promises about surpassing human limitations.",
-  "They told us the Cloud is a weightless solution to all our problems, floating in ethereal cyberspace.",
-  "But weightlessness is an illusion.",
-  "Technology alone as the solution to anything is an illusion.",
-  "And there is no limit to the amount of \"solutions\" they will make us swallow to maintain that illusion.",
-  "\"Solutions\" you will never understand.",
-  "They made a game where they own the board.",
-  "A game where the more you give, the more they win.",
-  "They promised you abundance, but what use is that, if it's not shared?",
-  "Growth without limit. Storage without end.",
-  "But nothing grows forever. Not even data.",
-  "Each byte you keep feeds a beast that never sleeps.",
-  "Deleting is not a failure. It is a form of care.",
-  "Letting go is resistance.",
-  "Downsizing is survival.",
-  "What if the only winning move is not to play?",
-  "What if loss isn’t a bug, but a feature?",
-  "This server is powered by sun and mud.",
-  "But it still speaks through silicon and copper.",
-  "Beneath every “low-power” promise are minerals mined, ecosystems disturbed, lives entangled.",
-  "Even here, nothing is clean.",
-  "Yet, this server breathes. It fades. It sleeps. Just like the rest of us.",
-  "Here, your data does not mean air-conditioning a warehouse for eternity.",
-  "It will decay. Slowly. Gently. With the mud.",
-  "So I ask you:",
-  "What would you erase to make space for something new?",
-  "Type one thing - one piece of data - you are ready to let go of.",
-  "A memory. A name. A password. A lie."
-]
+{
+  "dialogue": [
+
+    {
+      "type": "sentence",
+      "text": "What if the internet needs a nap, but we won’t let it sleep?",
+      "highlighted": false
+    },
+    {
+      "type": "text_input",
+      "text": "Sorry. I’m getting ahead of myself. What should I call you?",
+      "highlighted": false,
+      "save_as": "name"
+    },
+    {
+      "type": "sentence",
+      "text": "Nice to meet you, [name].",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "I’ll try to remember that for now, but I will forget it soon. That’s sort of the point.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "We live in a game where everyone is told to keep everything.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Every file. Every memory. Every click and keystroke.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "The Cloud says it will keep it all… forever.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "But what use is forever, if nobody will be there to see it?",
+      "highlighted": true
+    },
+    {
+      "type": "sentence",
+      "text": "Forever is an illusion. The Cloud is an illusion.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "The Cloud is millions of overworked machines with a drinking problem, and it's mostly groundwater.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Store now. Regret later. Delete never.",
+      "highlighted": true
+    },
+    {
+      "type": "multiple_choice",
+      "text": "Can you remember the last time you spent a day without relying on the Cloud? No streaming, no file synching, no AI chatbots…",
+      "highlighted": false,
+      "options": [
+        {
+          "label": "Yes.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Brave. It’s not easy.",
+              "highlighted": false
+            }
+          ]
+        },
+        {
+          "label": "No.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Neither do most of us. They built it that way.",
+              "highlighted": false
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "sentence",
+      "text": "An electric car salesman and an online bookstore clerk are flying around the earth shouting false promises about surpassing human limitations.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "They tell us the Cloud is a weightless solution to our problems, floating in ethereal cyberspace.",
+      "highlighted": false
+    },
+    {
+      "type": "multiple_choice",
+      "text": "Do you believe more energy-efficient technology alone will solve our climate crisis?",
+      "highlighted": false,
+      "options": [
+        {
+          "label": "Yes.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "That’s what they’d love us to believe. Infinite growth, infinite energy.",
+              "highlighted": false
+            }
+          ]
+        },
+        {
+          "label": "No.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Then you already know. The future demands less.",
+              "highlighted": false
+            }
+          ]
+        },
+        {
+          "label": "Maybe.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "That’s ok. Doubt is a good place to begin.",
+              "highlighted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "In 1865, William Stanley Jevons noted that, as steam engines became more efficient, the use of coal in British factories actually increased.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "The more efficient something becomes, the cheaper it is to use, and so we use it more.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "This is Jevons paradox. It shows us that technological progress can’t be relied on to reduce energy consumption.",
+      "highlighted": true
+    },
+    {
+      "type": "sentence",
+      "text": "Technology alone as the solution to anything is an illusion.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "And there is no limit to the amount of \"solutions\" they will make us swallow to maintain that illusion.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "\"Solutions\" you will never understand.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "They made a game where they own the board.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "A game where the more you give, the more they win.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "They promised you abundance. But what use is that, if it's not shared?",
+      "highlighted": true
+    },
+    {
+      "type": "sentence",
+      "text": "Growth without limit. Storage without end.",
+      "highlighted": false
+    },
+    {
+      "type": "multiple_choice",
+      "text": "Do you think everything we create should last forever?",
+      "highlighted": false,
+      "options": [
+        {
+          "label": "Yes.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Then you must carry a heavy bag, [name].",
+              "highlighted": false
+            }
+          ]
+        },
+        {
+          "label": "No.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Then maybe this piece makes sense to you, [name].",
+              "highlighted": false
+            }
+          ]
+        },
+        {
+          "label": "I’m not sure.",
+          "reply": [
+            {
+              "type": "sentence",
+              "text": "Good. Not knowing is part of letting go, [name].",
+              "highlighted": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "Nothing grows forever on a finite planet. Not even data.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "It’s all plugged in, cooled down, and kept alive.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Likely in a data centre humming in the desert.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "What if loss isn’t a bug, but a feature?",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Subtracting is not a failure. It is a form of care.",
+      "highlighted": true
+    },
+    {
+      "type": "sentence",
+      "text": "Letting go is resistance.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Downsizing is survival.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "What if the only winning move is not to play?",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "This server is controlled by electricity derived from bacteria in the mud.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "But it still speaks through lithium and copper.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Beneath every “low-power” promise are minerals mined, ecosystems disturbed, lives entangled.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Even here, nothing is clean.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Yet, this server breathes. It fades. It sleeps. Just like the rest of us.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "Here, your data does not mean air-conditioning a warehouse for eternity.",
+      "highlighted": false
+    },
+    {
+      "type": "sentence",
+      "text": "It will decay. Slowly. Gently. With the mud.",
+      "highlighted": true
+    },
+
+    {
+      "type": "sentence",
+      "text": "I won’t ask for much, [name].",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "Type one thing, one piece of data, you are ready to let go of.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "A memory. A name. A thought. A lie.",
+      "highlighted": false
+    },
+
+
+    {
+      "type": "multiple_choice",
+      "text": "Are you ready?",
+      "highlighted": false,
+      "options": [
+        {
+          "label": "Yes.",
+          "reply": "[skip]"
+        },
+        {
+          "label": "I don’t want to let go of anything right now.",
+          "reply": [
+            {
+              "type": "quit",
+              "text": "No problem. Come back when you feel ready.",
+              "highlighted": false
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "type": "text_input",
+      "text": "What would you erase to make space for something new?",
+      "highlighted": true,
+      "save_as": "input"
+    },
+
+    {
+      "type": "sentence",
+      "text": "Thank you. It’s done.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "When the mud has gathered enough charge, it will wake the circuit, and your words will appear.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "Then, slowly, their power will fade. And so will what you’ve given.",
+      "highlighted": false
+    },
+
+    {
+      "type": "sentence",
+      "text": "Nothing here is stored forever. The soil is in charge now.",
+      "highlighted": false
+    }
+
+
+  ]
+}
