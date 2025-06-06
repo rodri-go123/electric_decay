@@ -70,13 +70,13 @@ def draw_text(surface, text, x, y, font, color, max_width):
         test_line = f"{line} {word}".strip()
         test_width, _ = font.size(test_line)
         if test_width > max_width:
-            rendered = font.render(line, True, color)
+            rendered = font.render(line, False, color)
             surface.blit(rendered, (x, y + y_offset))
             y_offset += font.get_height()
             line = word
         else:
             line = test_line
-    rendered = font.render(line, True, color)
+    rendered = font.render(line, False, color)
     surface.blit(rendered, (x, y + y_offset))
     return y + y_offset + font.get_height()
 
@@ -126,6 +126,9 @@ while running:
                     color = HIGHLIGHT if i == selected_option else GRAY
                     draw_text(screen, f"> {option_text}", 30, y_offset, font, color, SCREEN_WIDTH - 60)
                     y_offset += font.get_height()
+                color = GRAY
+                helper_text = "Use the Arrows (↑↓) to select. Press Enter to confirm your answer."
+                draw_text(screen, helper_text, 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
 
         elif prompt_type == "text_input":
             if input_text:
@@ -140,6 +143,12 @@ while running:
 
             cursor = "|" if show_cursor else ""
             draw_text(screen, f"> {input_display_text}{cursor}", 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
+
+        elif prompt_type == "sentence" and current_prompt == 0:
+            # Display first helper prompt
+            helper_text = "Press Enter to start a conversation."
+            color = GRAY
+            draw_text(screen, helper_text, 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
 
 
 
