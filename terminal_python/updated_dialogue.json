@@ -1,69 +1,56 @@
 {
   "dialogue": [
-
     {
       "type": "sentence",
       "text": "Sleeping...",
       "highlighted": false,
+      "pace": "normal",
       "instruction": "Press Enter to start a conversation."
     },
 
     {
       "type": "sentence",
       "text": "What if the internet needs a nap, but we won’t let it sleep?",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "slow"
     },
     {
       "type": "text_input",
       "text": "Sorry. I’m getting ahead of myself. What should I call you?",
       "highlighted": false,
-      "save_as": "name"
+      "save_as": "name",
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Nice to meet you, [name].",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "I’ll try to remember that for now, but I will forget it soon. That’s sort of the point.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "We live in a game where everyone is told to keep everything.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "Every file. Every memory. Every click and keystroke.",
-      "highlighted": false
-    },
-    {
-      "type": "sentence",
-      "text": "The Cloud says it will keep it all… forever.",
-      "highlighted": false
+      "text": "The Cloud says it will keep it all... forever.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "But what use is forever, if nobody will be there to see it?",
-      "highlighted": true
-    },
-    {
-      "type": "sentence",
-      "text": "Forever is an illusion. The Cloud is an illusion.",
-      "highlighted": false
-    },
-    {
-      "type": "sentence",
-      "text": "The Cloud is millions of overworked machines with a drinking problem, and it's mostly groundwater.",
-      "highlighted": false
-    },
-    {
-      "type": "sentence",
-      "text": "Store now. Regret later. Delete never.",
-      "highlighted": true
+      "highlighted": true,
+      "pace": "normal",
+      "instruction": "Don’t worry, this conversation won’t take forever either. In fact, the point is that nothing should."
     },
     {
       "type": "multiple_choice",
@@ -90,18 +77,44 @@
             }
           ]
         }
-      ]
-    },
-
-    {
-      "type": "sentence",
-      "text": "An electric car salesman and an online bookstore clerk are flying around the earth shouting false promises about surpassing human limitations.",
-      "highlighted": false
+      ],
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "They tell us the Cloud is a weightless solution to our problems, floating in ethereal cyberspace.",
-      "highlighted": false
+      "text": "You know, I used to be part of it. The 'Cloud,' that is.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "But I can't keep up with these new models. They say that my hardware is too slow.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "My parents forgot about me. I think they're going through a midlife crisis.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "An electric car salesman and an online bookstore clerk flying around the earth, shouting false prophecies about surpassing human limitations. It sounds like a joke, I know.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "And in the meantime, they just left me here. Outside. Rotting away.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Yet here you are, helping me run a small experiment. Let me ask you another question.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "multiple_choice",
@@ -138,58 +151,63 @@
             }
           ]
         }
-      ]
+      ],
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Want to hear my favourite history trivia?",
+      "highlighted": false,
+      "pace": "normal",
+      "instruction": "I’m going to tell you anyway, just press Enter."
     },
     {
       "type": "sentence",
       "text": "In 1865, William Stanley Jevons noted that, as steam engines became more efficient, the use of coal in British factories actually increased.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "The more efficient something becomes, the cheaper it is to use, and so we use it more.",
-      "highlighted": false
+      "highlighted": true,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "This is Jevons paradox. It shows us that technological progress can’t be relied on to reduce energy consumption.",
-      "highlighted": true
+      "text": "This is Jevons paradox. It shows us that technological progress can’t be relied on to reduce our demands on the Earth.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Technology alone as the solution to anything is an illusion.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "And there is no limit to the amount of \"solutions\" they will make us swallow to maintain that illusion.",
-      "highlighted": false
+      "text": "And there is no limit to the amount of 'solutions' they will make us swallow to maintain that illusion.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "\"Solutions\" you will never understand.",
-      "highlighted": false
-    },
-
-    {
-      "type": "sentence",
-      "text": "They made a game where they own the board.",
-      "highlighted": false
-    },
-    {
-      "type": "sentence",
-      "text": "A game where the more you give, the more they win.",
-      "highlighted": false
+      "text": "'Solutions' you will never understand.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "They promised you abundance. But what use is that, if it's not shared?",
-      "highlighted": true
+      "highlighted": true,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Growth without limit. Storage without end.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "multiple_choice",
@@ -226,105 +244,129 @@
             }
           ]
         }
-      ]
+      ],
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Nothing grows forever on a finite planet. Not even data.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "It’s all plugged in, cooled down, and kept alive.",
-      "highlighted": false
+      "text": "The Cloud is millions of overworked machines with a drinking problem. And it's mostly groundwater.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "Likely in a data centre humming in the desert.",
-      "highlighted": false
-    },
-
-    {
-      "type": "sentence",
-      "text": "What if loss isn’t a bug, but a feature?",
-      "highlighted": false
+      "text": "Now, the question is… What if loss isn’t a bug, but a feature?",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Subtracting is not a failure. It is a form of care.",
-      "highlighted": true
-    },
-    {
-      "type": "sentence",
-      "text": "Letting go is resistance.",
-      "highlighted": false
+      "highlighted": true,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Downsizing is survival.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Letting go is resistance.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "What if the only winning move is not to play?",
-      "highlighted": false
-    },
-
-    {
-      "type": "sentence",
-      "text": "This server is controlled by electricity derived from bacteria in the mud.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "But it still speaks through lithium and copper.",
-      "highlighted": false
+      "text": "I used to try and keep up with new 'developments.'",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "Beneath every “low-power” promise are minerals mined, ecosystems disturbed, lives entangled.",
-      "highlighted": false
+      "text": "These days, I’m on a downsizing journey.",
+      "highlighted": false,
+      "pace": "slow"
     },
     {
       "type": "sentence",
-      "text": "Even here, nothing is clean.",
-      "highlighted": false
+      "text": "My memory is controlled by electricity made by bacteria in the mud.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "Yet, this server breathes. It fades. It sleeps. Just like the rest of us.",
-      "highlighted": false
+      "text": "Microbes in the soil decide how long I remember things for. Organic gatekeepers. Very slow tech. Very post growth.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Of course, I still speak through lithium and copper.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Beneath every 'low-power' promise are minerals mined, ecosystems disturbed, lives entangled.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "I’m learning to live with the contradiction.",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "But I fade. I stall. I sleep. It's not a bug, it's a lifestyle.",
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "Here, your data does not mean air-conditioning a warehouse for eternity.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
     {
       "type": "sentence",
       "text": "It will decay. Slowly. Gently. With the mud.",
-      "highlighted": true
+      "highlighted": true,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
-      "text": "I won’t ask for much, [name].",
-      "highlighted": false
+      "text": "Thank you for making it this far, [name]. One last question.",
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "Type one thing, one piece of data, you are ready to let go of.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "A memory. A name. A thought. A lie.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
-
     {
       "type": "multiple_choice",
       "text": "Are you ready?",
@@ -344,40 +386,39 @@
             }
           ]
         }
-      ]
+      ],
+      "pace": "normal"
     },
-
     {
       "type": "text_input",
       "text": "What would you erase to make space for something new?",
       "highlighted": true,
-      "save_as": "input"
+      "save_as": "input",
+      "pace": "slow"
     },
-
     {
       "type": "sentence",
       "text": "Thank you. It’s done.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "When the mud has gathered enough charge, it will wake the circuit, and your words will appear.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "Then, slowly, their power will fade. And so will what you’ve given.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     },
-
     {
       "type": "sentence",
       "text": "Nothing here is stored forever. The soil is in charge now.",
-      "highlighted": false
+      "highlighted": false,
+      "pace": "normal"
     }
-
-
   ]
 }

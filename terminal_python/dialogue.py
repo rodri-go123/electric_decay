@@ -6,7 +6,7 @@ import platform
 import time
 
 # Loading JSON
-with open("terminal_python/sentences.json", "r", encoding="utf-8") as f:
+with open("terminal_python/updated_dialogue.json", "r", encoding="utf-8") as f:
     dialogue_data = json.load(f)
 
 # Settings
@@ -17,6 +17,11 @@ INPUT_FILE = "/tmp/input.txt"
 
 # check if running on Raspberry Pi
 is_raspberry_pi = platform.system() == "Linux" and os.uname().machine.startswith("arm")
+
+if is_raspberry_pi:
+    import RPi.GPIO as GPIO   
+    # GPIO pin number (BCM numbering)
+    SWITCH_PIN = 4
 
 # Initialize pygame
 pygame.init()
@@ -30,12 +35,8 @@ clock = pygame.time.Clock()
 string_index = 0
 current_character = 0
 
-# Typing speed
+# Typing time counter
 last_char_time = time.time()
-delay_normal = 0.001  
-delay_comma = 0.3       
-delay_period = 0.6 
-delay_space = 0.05    
 
 # State
 showing_reply = False
@@ -99,6 +100,18 @@ while running:
     text_color = HIGHLIGHT if highlight else WHITE
     y_offset = draw_text(screen, display_text, 30, 60, font, text_color, SCREEN_WIDTH - 60)
 
+    # access the prompt["pace"] and make a multiplier
+    if prompt["pace"] == "normal" :
+        delay_normal = 0.001  
+        delay_comma = 0.3       
+        delay_period = 0.6 
+        delay_space = 0.05    
+    elif prompt["pace"] == "slow":
+        delay_normal = 0.1  
+        delay_comma = 0.8       
+        delay_period = 1.2 
+        delay_space = 0.2    
+
     now = time.time()
     if current_character < len(full_text):
         prev_char = full_text[current_character - 1] if current_character > 0 else ''
@@ -144,6 +157,7 @@ while running:
             cursor = "|" if show_cursor else ""
             draw_text(screen, f"> {input_display_text}{cursor}", 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
 
+        # make this elif into if there's an instruction, display it
         elif prompt_type == "sentence" and current_prompt == 0:
             # Display first helper prompt
             helper_text = "Press Enter to start a conversation."
@@ -190,6 +204,29 @@ while running:
                         current_prompt += 1
                         current_character = 0
                         selected_option = 0
+                        # Check if mud has charged enough
+                        if is_raspberry_pi:
+                            GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
+                            GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
+
+                            print("Toggle switch test (Press Ctrl+C to exit)")
+
+                            try:
+                                while True:
+                                    input_state = GPIO.input(SWITCH_PIN)
+                                    if input_state == GPIO.LOW:
+                                        print("Switch is ON")
+                                    else:
+                                        print("Switch is OFF")
+                                    time.sleep(0.5)
+
+                            except KeyboardInterrupt:
+                                print("\nExiting...")
+
+                            finally:
+                                GPIO.cleanup()
+                            print()
+
                     # Otherwise, get the reply text
                     else:
                         reply_obj = prompt["options"][selected_option]["reply"][0]
