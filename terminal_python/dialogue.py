@@ -54,11 +54,15 @@ input_warning = False
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (20, 20, 20)
-GRAY = (100, 100, 100)
-HIGHLIGHT = (180, 255, 180)
+GRAY = (0, 0, 255)
+HIGHLIGHT = (200, 20, 200) # magenta
+TEXT = (0, 0, 0)
+BACKGROUND = (255, 255, 255)
+INSTRUCTION = (60, 60, 60)
 
 # Load font
 FONT_PATH = "./assets/PPMondwest-Regular.otf"
+# FONT_PATH = "./assets/PPNeueBit-Bold.otf"
 font = pygame.font.Font(FONT_PATH, 34)
 # font = pygame.font.SysFont("monospace", 24)
 
@@ -88,7 +92,7 @@ def substitute_vars(text):
 # Main loop
 running = True
 while running:
-    screen.fill(BLACK)
+    screen.fill(BACKGROUND)
     prompt = dialogue_data["dialogue"][current_prompt]
     prompt_text = substitute_vars(prompt["text"]) # substitute name if present
     prompt_type = prompt["type"]
@@ -97,20 +101,21 @@ while running:
     # Display prompt text with typing effect
     full_text = prompt_text + " ∇"
     display_text = full_text[:current_character] # show text up to current character
-    text_color = HIGHLIGHT if highlight else WHITE
-    y_offset = draw_text(screen, display_text, 30, 60, font, text_color, SCREEN_WIDTH - 60)
+    text_color = HIGHLIGHT if highlight else TEXT
+    instruction_color = INSTRUCTION
+    y_offset = draw_text(screen, display_text, 30, 60, font, text_color, SCREEN_WIDTH - 60)  
 
     # access the prompt["pace"] and make a multiplier
-    if prompt["pace"] == "normal" :
-        delay_normal = 0.001  
-        delay_comma = 0.3       
-        delay_period = 0.6 
-        delay_space = 0.05    
-    elif prompt["pace"] == "slow":
+    if prompt["pace"] == "slow":
         delay_normal = 0.1  
         delay_comma = 0.8       
         delay_period = 1.2 
-        delay_space = 0.2    
+        delay_space = 0.2
+    else:
+        delay_normal = 0.001  
+        delay_comma = 0.3       
+        delay_period = 0.6 
+        delay_space = 0.05 
 
     now = time.time()
     if current_character < len(full_text):
@@ -132,7 +137,7 @@ while running:
             if showing_reply and reply_data:
                 reply_text = substitute_vars(reply_data[0]["text"])
                 display_reply = reply_text[:current_character]
-                y_offset = draw_text(screen, display_reply, 30, y_offset + 20, font, WHITE, SCREEN_WIDTH - 60)
+                y_offset = draw_text(screen, display_reply, 30, y_offset + 20, font, TEXT, SCREEN_WIDTH - 60)
             else:
                 for i, option in enumerate(prompt["options"]):
                     option_text = option["label"]
@@ -146,7 +151,7 @@ while running:
         elif prompt_type == "text_input":
             if input_text:
                 input_display_text = input_text
-                color = WHITE
+                color = TEXT
             elif input_warning:
                 input_display_text = "Type something to continue, then press Enter."
                 color = GRAY
@@ -237,7 +242,8 @@ while running:
                         dialogue_data["dialogue"].insert(current_prompt + 1, {
                             "type": reply_type,
                             "text": reply_text,
-                            "highlighted": str(reply_obj.get("highlighted", False)).lower()
+                            "highlighted": str(reply_obj.get("highlighted", False)).lower(),
+                            "pace": str(reply_obj.get("pace", "normal")).lower()
                         })
 
                         current_prompt += 1

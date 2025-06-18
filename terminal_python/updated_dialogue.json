@@ -56,6 +56,7 @@
       "type": "multiple_choice",
       "text": "Can you remember the last time you spent a day without relying on the Cloud? No streaming, no file synching, no AI chatbots…",
       "highlighted": false,
+      "pace": "normal",
       "options": [
         {
           "label": "Yes.",
@@ -63,7 +64,8 @@
             {
               "type": "sentence",
               "text": "Brave. It’s not easy.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         },
@@ -73,12 +75,12 @@
             {
               "type": "sentence",
               "text": "Neither do most of us. They built it that way.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         }
-      ],
-      "pace": "normal"
+      ]
     },
     {
       "type": "sentence",
@@ -120,6 +122,7 @@
       "type": "multiple_choice",
       "text": "Do you believe more energy-efficient technology alone will solve our climate crisis?",
       "highlighted": false,
+      "pace": "normal",
       "options": [
         {
           "label": "Yes.",
@@ -127,7 +130,8 @@
             {
               "type": "sentence",
               "text": "That’s what they’d love us to believe. Infinite growth, infinite energy.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         },
@@ -137,7 +141,8 @@
             {
               "type": "sentence",
               "text": "Then you already know. The future demands less.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         },
@@ -147,12 +152,12 @@
             {
               "type": "sentence",
               "text": "That’s ok. Doubt is a good place to begin.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         }
-      ],
-      "pace": "normal"
+      ]
     },
     {
       "type": "sentence",
@@ -213,6 +218,7 @@
       "type": "multiple_choice",
       "text": "Do you think everything we create should last forever?",
       "highlighted": false,
+      "pace":"normal",
       "options": [
         {
           "label": "Yes.",
@@ -220,7 +226,8 @@
             {
               "type": "sentence",
               "text": "Then you must carry a heavy bag, [name].",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         },
@@ -230,7 +237,8 @@
             {
               "type": "sentence",
               "text": "Then maybe this piece makes sense to you, [name].",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         },
@@ -240,12 +248,12 @@
             {
               "type": "sentence",
               "text": "Good. Not knowing is part of letting go, [name].",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         }
-      ],
-      "pace": "normal"
+      ]
     },
     {
       "type": "sentence",
@@ -371,10 +379,13 @@
       "type": "multiple_choice",
       "text": "Are you ready?",
       "highlighted": false,
+      "pace": "normal",
       "options": [
         {
           "label": "Yes.",
-          "reply": "[skip]"
+          "reply": "[skip]",
+          "highlighted": false,
+          "pace": "normal"
         },
         {
           "label": "I don’t want to let go of anything right now.",
@@ -382,12 +393,12 @@
             {
               "type": "quit",
               "text": "No problem. Come back when you feel ready.",
-              "highlighted": false
+              "highlighted": false,
+              "pace": "normal"
             }
           ]
         }
-      ],
-      "pace": "normal"
+      ]
     },
     {
       "type": "text_input",
