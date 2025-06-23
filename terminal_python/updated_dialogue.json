@@ -16,6 +16,7 @@
     },
     {
       "type": "text_input",
+      "input_type": "name",
       "text": "Sorry. I’m getting ahead of myself. What should I call you?",
       "highlighted": false,
       "save_as": "name",
@@ -54,7 +55,7 @@
     },
     {
       "type": "multiple_choice",
-      "text": "Can you remember the last time you spent a day without relying on the Cloud? No streaming, no file synching, no AI chatbots…",
+      "text": "Can you remember the last time you spent a day without relying on the Cloud? No streaming, no AI chatbots…",
       "highlighted": false,
       "pace": "normal",
       "options": [
@@ -92,7 +93,8 @@
       "type": "sentence",
       "text": "But I can't keep up with these new models. They say that my hardware is too slow.",
       "highlighted": false,
-      "pace": "normal"
+      "pace": "normal",
+      "instruction": "Tip: I like to take my time, but feel free to press Enter as I speak to skip to the end of a sentence."
     },
     {
       "type": "sentence",
@@ -102,7 +104,7 @@
     },
     {
       "type": "sentence",
-      "text": "An electric car salesman and an online bookstore clerk flying around the earth, shouting false prophecies about surpassing human limitations. It sounds like a joke, I know.",
+      "text": "An electric car salesman and an online bookstore clerk flying around the earth, shouting false prophecies about surpassing human limitations. Sounds like a joke, I know.",
       "highlighted": false,
       "pace": "normal"
     },
@@ -402,6 +404,7 @@
     },
     {
       "type": "text_input",
+      "input_type": "message",
       "text": "What would you erase to make space for something new?",
       "highlighted": true,
       "save_as": "input",

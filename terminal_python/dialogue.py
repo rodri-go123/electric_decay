@@ -56,14 +56,15 @@ WHITE = (255, 255, 255)
 BLACK = (20, 20, 20)
 GRAY = (0, 0, 255)
 HIGHLIGHT = (200, 20, 200) # magenta
-TEXT = (0, 0, 0)
-BACKGROUND = (255, 255, 255)
-INSTRUCTION = (60, 60, 60)
+TEXT = (255, 255, 255) # white
+BACKGROUND = (0, 0, 0) # black
+INSTRUCTION = (0, 0, 255)
 
 # Load font
 FONT_PATH = "./assets/PPMondwest-Regular.otf"
-# FONT_PATH = "./assets/PPNeueBit-Bold.otf"
-font = pygame.font.Font(FONT_PATH, 34)
+INSTRUCTION_FONT_PATH = "./assets/PPNeueBit-Bold.otf"
+font = pygame.font.Font(FONT_PATH, 40)
+instruction_font = pygame.font.Font(FONT_PATH, 30)
 # font = pygame.font.SysFont("monospace", 24)
 
 # Wrap lines to fit screen
@@ -137,16 +138,17 @@ while running:
             if showing_reply and reply_data:
                 reply_text = substitute_vars(reply_data[0]["text"])
                 display_reply = reply_text[:current_character]
-                y_offset = draw_text(screen, display_reply, 30, y_offset + 20, font, TEXT, SCREEN_WIDTH - 60)
+                y_offset = draw_text(screen, display_reply, 30, y_offset + 20, instruction_font, TEXT, SCREEN_WIDTH - 60)
             else:
+                y_offset += 20
                 for i, option in enumerate(prompt["options"]):
                     option_text = option["label"]
                     color = HIGHLIGHT if i == selected_option else GRAY
-                    draw_text(screen, f"> {option_text}", 30, y_offset, font, color, SCREEN_WIDTH - 60)
-                    y_offset += font.get_height()
-                color = GRAY
+                    draw_text(screen, f"> {option_text}", 30, y_offset, instruction_font, color, SCREEN_WIDTH - 60)
+                    y_offset += instruction_font.get_height()
+                color = INSTRUCTION
                 helper_text = "Use the Arrows (↑↓) to select. Press Enter to confirm your answer."
-                draw_text(screen, helper_text, 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
+                draw_text(screen, helper_text, 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
 
         elif prompt_type == "text_input":
             if input_text:
@@ -154,20 +156,21 @@ while running:
                 color = TEXT
             elif input_warning:
                 input_display_text = "Type something to continue, then press Enter."
-                color = GRAY
+                color = INSTRUCTION
             else:
                 input_display_text = "Type your answer here, then press Enter."
-                color = GRAY
+                color = INSTRUCTION
 
             cursor = "|" if show_cursor else ""
-            draw_text(screen, f"> {input_display_text}{cursor}", 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
+            draw_text(screen, f"> {input_display_text}{cursor}", 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
 
         # make this elif into if there's an instruction, display it
-        elif prompt_type == "sentence" and current_prompt == 0:
-            # Display first helper prompt
-            helper_text = "Press Enter to start a conversation."
-            color = GRAY
-            draw_text(screen, helper_text, 30, y_offset + 20, font, color, SCREEN_WIDTH - 60)
+        elif prompt_type == "sentence" :
+            instruction = prompt.get("instruction")
+            if instruction:
+                helper_text = instruction
+                color = INSTRUCTION
+                draw_text(screen, helper_text, 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
 
 
 
@@ -257,7 +260,40 @@ while running:
                     if input_text.strip() == "":
                         input_warning = True  # Trigger the special placeholder
                     else:
-                        user_name = input_text.strip()
+                        input_type = prompt.get("input_type")
+                        if input_type == "name":
+                            user_name = input_text.strip()
+
+                        elif input_type == "message":
+                            user_message = input_text.strip()
+
+                            #add character limit
+                            new_message = {
+                                "name": user_name,
+                                "message": user_message,
+                                "timestamp": time.strftime("%d-%m-%Y %H:%M:%S")
+                            }
+
+                            new_message_path = "./data/user_messages.json"
+
+                            if os.path.exists(new_message_path):
+                                with open(new_message_path, "r") as infile:
+                                    try:
+                                        messages = json.load(infile)
+                                        if not isinstance(messages, list):
+                                            messages = []
+                                    except json.JSONDecodeError:
+                                        messages = []
+                            else:
+                                messages = []
+
+                            messages.append(new_message)
+
+                            new_json_object = json.dumps(new_message, indent=4)
+
+                            with open(new_message_path, "w") as outfile:
+                                json.dump(messages, outfile, indent=4)
+
                         input_text = ""
                         current_prompt += 1
                         current_character = 0
