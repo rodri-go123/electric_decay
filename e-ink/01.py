@@ -9,18 +9,47 @@ if os.path.exists(libdir):
     sys.path.append(libdir)
 
 import logging
-from waveshare_epd import epd7in5_V2
+# from waveshare_epd import epd7in5_V2
 import time
 import random
 import math
-from PIL import Image, ImageDraw, ImageFont
+# from PIL import Image, ImageDraw, ImageFont
+from datetime import datetime
 import traceback
 import textwrap
+import json
 
 logging.basicConfig(level=logging.WARNING)
 
 # Setup paths (adjust if needed)
 font_path = os.path.join(assetdir, 'PPMondwest-Regular.otf')  # Use any .ttf or .ttc font available
+data_path = "./data/user_messages.json"
+
+if os.path.exists(data_path):
+    with open(data_path, "r", encoding="utf-8") as f:
+        message_data = json.load(f)
+else:
+    message_data = [{
+        "name": "Rodrigo",
+        "message": "What if the internet needs a nap, but we won't let it sleep?",
+        "timestamp": "24-06-2025 10:30:00"
+    }]
+
+alt_data = [{
+    "name": "Rodrigo",
+    "message": "What if the internet needs a nap, but we won't let it sleep?",
+    "timestamp": "24-06-2025 10:30:00"
+}]
+
+# Convert timestamp strings to datetime objects and find the latest
+most_recent = max(message_data, key=lambda x: datetime.strptime(x['timestamp'], "%d-%m-%Y %H:%M:%S"))
+
+# Print the most recent message
+print("Most recent message:")
+print(f"From: {most_recent['name']}")
+print(f"Message: {most_recent['message']}")
+print(f"Timestamp: {most_recent['timestamp']}")
+print("stopping")
 
 # Initialize e-ink
 epd = epd7in5_V2.EPD()
