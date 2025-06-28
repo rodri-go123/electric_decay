@@ -216,29 +216,6 @@ while running:
                         current_character = 0
                         selected_option = 0
 
-                        # Check if mud has charged enough
-                        # if is_raspberry_pi:
-                        #     GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
-                        #     GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
-
-                        #     print("Toggle switch test (Press Ctrl+C to exit)")
-
-                        #     try:
-                        #         while True:
-                        #             input_state = GPIO.input(SWITCH_PIN)
-                        #             if input_state == GPIO.LOW:
-                        #                 print("Switch is ON")
-                        #             else:
-                        #                 print("Switch is OFF")
-                        #             time.sleep(0.5)
-
-                        #     except KeyboardInterrupt:
-                        #         print("\nExiting...")
-
-                        #     finally:
-                        #         GPIO.cleanup()
-                        #     print()
-
                     # Otherwise, get the reply text
                     else:
                         reply_obj = prompt["options"][selected_option]["reply"][0]
@@ -297,7 +274,33 @@ while running:
                             # Append new message
                             messages.append(new_message)
 
-                            # Write to temp file
+                            # Check if mud has charged enough
+                            if is_raspberry_pi:
+                                GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
+                                GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
+                                is_charged = False
+                                # start fallback timer if mud doesn't charge in 3 minutes
+                                fallback_timer = time.time() + 180  # 3 minutes from now
+                                try:
+
+                                    while not is_charged and time.time() < fallback_timer:
+                                        input_state = GPIO.input(SWITCH_PIN)
+                                        if input_state == GPIO.LOW:
+                                            print("Mud is charged!")
+                                            is_charged = True
+                                        else:
+                                            print("Mud is not charged yet, waiting...")
+                                            time.sleep(0.5)
+
+                                    print("Toggle switch test (Press Ctrl+C to exit)")
+
+                                except KeyboardInterrupt:
+                                    print("\nExiting...")
+
+                                finally:
+                                    GPIO.cleanup()
+
+                            # Write to temp file if mud is charged or if it has been more than 3 minutes since user submitted
                             with open(temp_message_path, "w") as tmpfile:
                                 json.dump(messages, tmpfile, indent=4)
                                 tmpfile.flush()
