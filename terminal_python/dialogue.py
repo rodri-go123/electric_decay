@@ -6,7 +6,7 @@ import platform
 import time
 
 # Loading JSON
-with open("terminal_python/updated_dialogue.json", "r", encoding="utf-8") as f:
+with open("./data/updated_dialogue.json", "r", encoding="utf-8") as f:
     dialogue_data = json.load(f)
 
 # Settings
@@ -16,12 +16,15 @@ FPS = 30
 INPUT_FILE = "/tmp/input.txt"
 
 # check if running on Raspberry Pi
-is_raspberry_pi = platform.system() == "Linux" and os.uname().machine.startswith("arm")
+is_raspberry_pi = platform.system() == "Linux" and os.uname().machine.startswith("aarch64")
+print(platform.system())
+print(os.uname().machine)
 
 if is_raspberry_pi:
     import RPi.GPIO as GPIO   
     # GPIO pin number (BCM numbering)
     SWITCH_PIN = 4
+    print("Running on Raspberry Pi")
 
 # Initialize pygame
 pygame.init()
@@ -212,28 +215,29 @@ while running:
                         current_prompt += 1
                         current_character = 0
                         selected_option = 0
+
                         # Check if mud has charged enough
-                        if is_raspberry_pi:
-                            GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
-                            GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
+                        # if is_raspberry_pi:
+                        #     GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
+                        #     GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
 
-                            print("Toggle switch test (Press Ctrl+C to exit)")
+                        #     print("Toggle switch test (Press Ctrl+C to exit)")
 
-                            try:
-                                while True:
-                                    input_state = GPIO.input(SWITCH_PIN)
-                                    if input_state == GPIO.LOW:
-                                        print("Switch is ON")
-                                    else:
-                                        print("Switch is OFF")
-                                    time.sleep(0.5)
+                        #     try:
+                        #         while True:
+                        #             input_state = GPIO.input(SWITCH_PIN)
+                        #             if input_state == GPIO.LOW:
+                        #                 print("Switch is ON")
+                        #             else:
+                        #                 print("Switch is OFF")
+                        #             time.sleep(0.5)
 
-                            except KeyboardInterrupt:
-                                print("\nExiting...")
+                        #     except KeyboardInterrupt:
+                        #         print("\nExiting...")
 
-                            finally:
-                                GPIO.cleanup()
-                            print()
+                        #     finally:
+                        #         GPIO.cleanup()
+                        #     print()
 
                     # Otherwise, get the reply text
                     else:
@@ -274,7 +278,10 @@ while running:
                                 "timestamp": time.strftime("%d-%m-%Y %H:%M:%S")
                             }
 
+                            print(new_message)
+
                             new_message_path = "./data/user_messages.json"
+                            temp_message_path = "./data/user_messages.json.tmp"
 
                             if os.path.exists(new_message_path):
                                 with open(new_message_path, "r") as infile:
@@ -286,13 +293,17 @@ while running:
                                         messages = []
                             else:
                                 messages = []
-
+                            
+                            # Append new message
                             messages.append(new_message)
 
-                            new_json_object = json.dumps(new_message, indent=4)
+                            # Write to temp file
+                            with open(temp_message_path, "w") as tmpfile:
+                                json.dump(messages, tmpfile, indent=4)
+                                tmpfile.flush()
+                                os.fsync(tmpfile.fileno())
 
-                            with open(new_message_path, "w") as outfile:
-                                json.dump(messages, outfile, indent=4)
+                            os.replace(temp_message_path, new_message_path)
 
                         input_text = ""
                         current_prompt += 1

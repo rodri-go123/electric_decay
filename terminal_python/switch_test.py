@@ -15,8 +15,6 @@ try:
         input_state = GPIO.input(SWITCH_PIN)
         if input_state == GPIO.LOW:
             print("Switch is ON")
-        else:
-            print("Switch is OFF")
         time.sleep(0.5)
 
 except KeyboardInterrupt:
