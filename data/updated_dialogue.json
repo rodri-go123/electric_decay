@@ -94,17 +94,11 @@
       "text": "But I can't keep up with these new models. They say that my hardware is too slow.",
       "highlighted": false,
       "pace": "normal",
-      "instruction": "Tip: I like to take my time, but feel free to press Enter as I speak to skip to the end of a sentence."
+      "instruction": "Tip: I like to take my time, but you can press Enter to skip to the end of a sentence."
     },
     {
       "type": "sentence",
-      "text": "My parents forgot about me. I think they're going through a midlife crisis.",
-      "highlighted": false,
-      "pace": "normal"
-    },
-    {
-      "type": "sentence",
-      "text": "An electric car salesman and an online bookstore clerk flying around the earth, shouting false prophecies about surpassing human limitations. Sounds like a joke, I know.",
+      "text": "An electric car salesman and an online bookstore clerk are flying around the earth, shouting false prophecies about surpassing human limitations.",
       "highlighted": false,
       "pace": "normal"
     },
@@ -116,7 +110,13 @@
     },
     {
       "type": "sentence",
-      "text": "Yet here you are, helping me run a small experiment. Let me ask you another question.",
+      "text": "Sounds like a bad sci-fi movie, doesn’t it?",
+      "highlighted": false,
+      "pace": "normal"
+    },
+    {
+      "type": "sentence",
+      "text": "Yet here we are, and you're helping me run a small experiment. Let me ask you another question.",
       "highlighted": false,
       "pace": "normal"
     },
@@ -170,7 +170,7 @@
     },
     {
       "type": "sentence",
-      "text": "In 1865, William Stanley Jevons noted that, as steam engines became more efficient, the use of coal in British factories actually increased.",
+      "text": "In the 1860s, as steam engines became more efficient, the use of coal in British factories actually increased.",
       "highlighted": false,
       "pace": "normal"
     },
@@ -393,7 +393,7 @@
           "label": "I don’t want to let go of anything right now.",
           "reply": [
             {
-              "type": "quit",
+              "type": "restart",
               "text": "No problem. Come back when you feel ready.",
               "highlighted": false,
               "pace": "normal"
@@ -412,19 +412,20 @@
     },
     {
       "type": "sentence",
+      "text": "When the mud has gathered enough charge, it will wake the circuit, and your words will appear.",
+      "highlighted": false,
+      "pace": "normal",
+      "instruction": "The mud is charging..."
+    },
+    {
+      "type": "sentence",
       "text": "Thank you. It’s done.",
       "highlighted": false,
       "pace": "normal"
     },
     {
       "type": "sentence",
-      "text": "When the mud has gathered enough charge, it will wake the circuit, and your words will appear.",
-      "highlighted": false,
-      "pace": "normal"
-    },
-    {
-      "type": "sentence",
-      "text": "Then, slowly, their power will fade. And so will what you’ve given.",
+      "text": "Now, slowly, the mud will recharge, and your words will decay.",
       "highlighted": false,
       "pace": "normal"
     },
@@ -432,7 +433,8 @@
       "type": "sentence",
       "text": "Nothing here is stored forever. The soil is in charge now.",
       "highlighted": false,
-      "pace": "normal"
+      "pace": "normal",
+      "instruction": "You've reached the end of this conversation. Thank you. Press Enter to restart."
     }
   ]
 }

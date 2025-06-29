@@ -67,7 +67,7 @@ INSTRUCTION = (0, 0, 255)
 FONT_PATH = "./assets/PPMondwest-Regular.otf"
 INSTRUCTION_FONT_PATH = "./assets/PPNeueBit-Bold.otf"
 font = pygame.font.Font(FONT_PATH, 40)
-instruction_font = pygame.font.Font(FONT_PATH, 30)
+instruction_font = pygame.font.Font(FONT_PATH, 34)
 # font = pygame.font.SysFont("monospace", 24)
 
 # Wrap lines to fit screen
@@ -93,10 +93,30 @@ def draw_text(surface, text, x, y, font, color, max_width):
 def substitute_vars(text):
     return text.replace("[name]", user_name)
 
+def restart():
+    global current_prompt, current_character, selected_option
+    global input_text, user_name, input_warning
+    global showing_reply, reply_data
+
+    current_prompt = 0
+    current_character = 0
+    selected_option = 0
+    input_text = ""
+    user_name = ""
+    input_warning = False
+    showing_reply = False
+    reply_data = None
+
+
 # Main loop
 running = True
 while running:
     screen.fill(BACKGROUND)
+
+    # reset logic
+    if current_prompt >= len(dialogue_data["dialogue"]):
+        restart()
+
     prompt = dialogue_data["dialogue"][current_prompt]
     prompt_text = substitute_vars(prompt["text"]) # substitute name if present
     prompt_type = prompt["type"]
@@ -194,10 +214,10 @@ while running:
                     current_character = len(full_text)  
                 continue
 
-            elif prompt_type == "sentence" or prompt_type == "quit":
+            elif prompt_type == "sentence" or prompt_type == "restart":
                 if event.key == pygame.K_RETURN:
-                    if prompt_type == "quit":
-                        running = False  # quit after displaying quit message
+                    if prompt_type == "restart":
+                        restart()
                     else:
                         current_prompt += 1
                         current_character = 0
@@ -284,6 +304,8 @@ while running:
                                 try:
 
                                     while not is_charged and time.time() < fallback_timer:
+                                        current_prompt += 1
+                                        current_character = 0
                                         input_state = GPIO.input(SWITCH_PIN)
                                         if input_state == GPIO.LOW:
                                             print("Mud is charged!")
