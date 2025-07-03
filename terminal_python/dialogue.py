@@ -59,8 +59,8 @@ WHITE = (255, 255, 255)
 BLACK = (20, 20, 20)
 GRAY = (0, 0, 255)
 HIGHLIGHT = (200, 20, 200) # magenta
-TEXT = (255, 255, 255) # white
-BACKGROUND = (0, 0, 0) # black
+BACKGROUND = (255, 255, 255) # white
+TEXT = (0, 0, 0) # black
 INSTRUCTION = (0, 0, 255)
 
 # Load font
@@ -88,6 +88,22 @@ def draw_text(surface, text, x, y, font, color, max_width):
     rendered = font.render(line, False, color)
     surface.blit(rendered, (x, y + y_offset))
     return y + y_offset + font.get_height()
+
+def show_popup(screen, font, message):
+    popup_width, popup_height = 600, 300
+    screen_width, screen_height = screen.get_size()
+    popup_x = (screen_width - popup_width) // 2
+    popup_y = (screen_height - popup_height) // 2
+
+    # Draw popup background
+    pygame.draw.rect(screen, (50, 50, 50), (popup_x, popup_y, popup_width, popup_height))
+    pygame.draw.rect(screen, (255, 255, 255), (popup_x, popup_y, popup_width, popup_height), 2)  # Border
+
+    # Render and draw text
+    text_surface = instruction_font.render(message, True, (255, 255, 255))
+    text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
+    screen.blit(text_surface, text_rect)
+
 
 # user name
 def substitute_vars(text):
@@ -304,17 +320,20 @@ while running:
                                 try:
 
                                     while not is_charged and time.time() < fallback_timer:
-                                        current_prompt += 1
-                                        current_character = 0
+                                        # current_prompt += 1
+                                        # current_character = 0
                                         input_state = GPIO.input(SWITCH_PIN)
                                         if input_state == GPIO.LOW:
                                             print("Mud is charged!")
                                             is_charged = True
+                                            # popup goes away
                                         else:
+                                            #popup message saying mud is not charged
                                             print("Mud is not charged yet, waiting...")
-                                            time.sleep(0.5)
+                                            show_popup(screen, font, "The mud is charging... It will wake up at 3.5V")
+                                            pygame.display.flip()
+                                            time.sleep(0.25)
 
-                                    print("Toggle switch test (Press Ctrl+C to exit)")
 
                                 except KeyboardInterrupt:
                                     print("\nExiting...")

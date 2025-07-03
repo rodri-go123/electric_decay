@@ -412,13 +412,6 @@
     },
     {
       "type": "sentence",
-      "text": "When the mud has gathered enough charge, it will wake the circuit, and your words will appear.",
-      "highlighted": false,
-      "pace": "normal",
-      "instruction": "The mud is charging..."
-    },
-    {
-      "type": "sentence",
       "text": "Thank you. It’s done.",
       "highlighted": false,
       "pace": "normal"
