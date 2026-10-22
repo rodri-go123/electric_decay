@@ -63,13 +63,13 @@ input_warning = False
 last_gpio_state = None
 
 # Colors
-WHITE = (255, 255, 255)
-BLACK = (20, 20, 20)
-GRAY = (0, 0, 255)
-HIGHLIGHT = (200, 20, 200) # magenta
-BACKGROUND = (255, 255, 255) # white
-TEXT = (0, 0, 0) # black
-INSTRUCTION = (0, 0, 255)
+WHITE = pygame.Color("#ffffff")
+BLACK = pygame.Color("#141414")
+GRAY = pygame.Color("#5faa46")
+HIGHLIGHT = pygame.Color("#ffff00") # fluorescent yellow
+BACKGROUND = pygame.Color("#192008") # dark yellowish green
+TEXT = pygame.Color("#ebff00") # contrasting fluorescent yellow
+INSTRUCTION = pygame.Color("#99a700") # green, replacing the former blue instructions
 
 # Load font
 FONT_PATH = "./assets/PPMondwest-Regular.otf"
@@ -104,11 +104,11 @@ def show_popup(screen, font, message):
     popup_y = (screen_height - popup_height) // 2
 
     # Draw popup background
-    pygame.draw.rect(screen, (50, 50, 50), (popup_x, popup_y, popup_width, popup_height))
-    pygame.draw.rect(screen, (255, 255, 255), (popup_x, popup_y, popup_width, popup_height), 2)  # Border
+    pygame.draw.rect(screen, BACKGROUND, (popup_x, popup_y, popup_width, popup_height))
+    pygame.draw.rect(screen, INSTRUCTION, (popup_x, popup_y, popup_width, popup_height), 2)  # Border
 
     # Render and draw text
-    text_surface = instruction_font.render(message, True, (255, 255, 255))
+    text_surface = instruction_font.render(message, True, TEXT)
     text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
     screen.blit(text_surface, text_rect)
 

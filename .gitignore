@@ -2,3 +2,4 @@
 *.otf
 *.pyc
 venv/
+data/user_messages.json
