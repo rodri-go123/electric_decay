@@ -24,10 +24,17 @@ if is_raspberry_pi:
     import RPi.GPIO as GPIO   
     # GPIO pin number (BCM numbering)
     SWITCH_PIN = 4
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     print("Running on Raspberry Pi")
+    print(f"Listening for GPIO {SWITCH_PIN} (physical pin 7) connected to GND...")
 
 # Initialize pygame
 pygame.init()
+
+# Idle timeout settings
+IDLE_TIMEOUT = 120  # 2 minutes
+last_input_time = time.time()  # Initialize to current time
 
 flags = pygame.FULLSCREEN if is_raspberry_pi else 0
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
@@ -53,6 +60,7 @@ last_cursor_switch = time.time()
 cursor_interval = 0.5
 user_name = ""
 input_warning = False
+last_gpio_state = None
 
 # Colors
 WHITE = (255, 255, 255)
@@ -104,6 +112,13 @@ def show_popup(screen, font, message):
     text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
     screen.blit(text_surface, text_rect)
 
+def check_idle_timeout():
+    global last_input_time
+    if time.time() - last_input_time > IDLE_TIMEOUT:
+        print("Idle timeout reached. Restarting...")
+        restart()
+        last_input_time = time.time()  # Reset timer after restart
+
 
 # user name
 def substitute_vars(text):
@@ -112,7 +127,7 @@ def substitute_vars(text):
 def restart():
     global current_prompt, current_character, selected_option
     global input_text, user_name, input_warning
-    global showing_reply, reply_data
+    global showing_reply, reply_data, dialogue_data
 
     current_prompt = 0
     current_character = 0
@@ -122,12 +137,23 @@ def restart():
     input_warning = False
     showing_reply = False
     reply_data = None
+    with open("./data/updated_dialogue.json", "r", encoding="utf-8") as f:
+        dialogue_data = json.load(f)
 
 
 # Main loop
 running = True
 while running:
     screen.fill(BACKGROUND)
+    check_idle_timeout()
+
+    # Report changes on the charging-status input without flooding the console.
+    if is_raspberry_pi:
+        gpio_state = GPIO.input(SWITCH_PIN)
+        if gpio_state != last_gpio_state:
+            connection_status = "CONNECTED to GND" if gpio_state == GPIO.LOW else "not connected"
+            print(f"GPIO {SWITCH_PIN}: {connection_status}", flush=True)
+            last_gpio_state = gpio_state
 
     # reset logic
     if current_prompt >= len(dialogue_data["dialogue"]):
@@ -224,6 +250,7 @@ while running:
             running = False
 
         elif event.type == pygame.KEYDOWN:
+            last_input_time = time.time()  # Reset idle timer on any key press
             # skip to end of text on ENTER
             if current_character < len(full_text):
                 if event.key == pygame.K_RETURN:
@@ -312,8 +339,6 @@ while running:
 
                             # Check if mud has charged enough
                             if is_raspberry_pi:
-                                GPIO.setmode(GPIO.BCM)       # Use BCM pin numbering
-                                GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
                                 is_charged = False
                                 # start fallback timer if mud doesn't charge in 3 minutes
                                 fallback_timer = time.time() + 180  # 3 minutes from now
@@ -337,9 +362,6 @@ while running:
 
                                 except KeyboardInterrupt:
                                     print("\nExiting...")
-
-                                finally:
-                                    GPIO.cleanup()
 
                             # Write to temp file if mud is charged or if it has been more than 3 minutes since user submitted
                             with open(temp_message_path, "w") as tmpfile:
@@ -366,4 +388,6 @@ while running:
     clock.tick(FPS)
 
 pygame.quit()
+if is_raspberry_pi:
+    GPIO.cleanup()
 sys.exit()
