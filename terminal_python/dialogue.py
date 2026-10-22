@@ -31,6 +31,8 @@ if is_raspberry_pi:
 
 # Initialize pygame
 pygame.init()
+if is_raspberry_pi:
+    pygame.mouse.set_visible(False)
 
 # Idle timeout settings
 IDLE_TIMEOUT = 120  # 2 minutes
@@ -426,5 +428,6 @@ while running:
 
 pygame.quit()
 if is_raspberry_pi:
+    pygame.mouse.set_visible(True)
     GPIO.cleanup()
 sys.exit()
