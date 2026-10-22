@@ -36,7 +36,14 @@ if is_raspberry_pi:
 
 # Idle timeout settings
 IDLE_TIMEOUT = 120  # 2 minutes
+CONFIRMATION_TIMEOUT = 45
+CONFIRMATION_ALERT_DURATION = 6
+CONFIRMATION_ALERT_INTERVAL = 15
 last_input_time = time.time()  # Initialize to current time
+inactivity_confirmation = False
+confirmation_deadline = None
+confirmation_alert_started = None
+next_confirmation_alert = None
 
 flags = pygame.FULLSCREEN if is_raspberry_pi else 0
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
@@ -75,6 +82,14 @@ HIGHLIGHT = pygame.Color("#ffff00") # fluorescent yellow
 BACKGROUND = pygame.Color("#192008") # dark yellowish green
 TEXT = pygame.Color("#ebff00") # contrasting fluorescent yellow
 INSTRUCTION = pygame.Color("#99a700") # green, replacing the former blue instructions
+
+def blend_colors(start, end, amount):
+    amount = max(0.0, min(1.0, amount))
+    return pygame.Color(
+        round(start.r + (end.r - start.r) * amount),
+        round(start.g + (end.g - start.g) * amount),
+        round(start.b + (end.b - start.b) * amount),
+    )
 
 # Load font
 FONT_PATH = "./assets/PPMondwest-Regular.otf"
@@ -140,11 +155,28 @@ def show_popup(screen, font, message):
     screen.blit(text_surface, text_rect)
 
 def check_idle_timeout():
-    global last_input_time
-    if time.time() - last_input_time > IDLE_TIMEOUT:
-        print("Idle timeout reached. Restarting...")
-        restart()
-        last_input_time = time.time()  # Reset timer after restart
+    global last_input_time, inactivity_confirmation, confirmation_deadline
+    global confirmation_alert_started, next_confirmation_alert
+    now = time.time()
+    if current_prompt == 0:
+        # The initial "Sleeping..." prompt is intentionally never interrupted.
+        last_input_time = now
+        return
+    if inactivity_confirmation:
+        if now >= confirmation_deadline:
+            print("Inactivity confirmation expired. Restarting...")
+            restart()
+            inactivity_confirmation = False
+            confirmation_deadline = None
+            confirmation_alert_started = None
+            next_confirmation_alert = None
+            last_input_time = now
+    elif now - last_input_time > IDLE_TIMEOUT:
+        print("Inactivity timeout reached. Showing confirmation...")
+        inactivity_confirmation = True
+        confirmation_deadline = now + CONFIRMATION_TIMEOUT
+        confirmation_alert_started = now
+        next_confirmation_alert = now + CONFIRMATION_ALERT_INTERVAL
 
 
 # user name
@@ -164,6 +196,12 @@ def restart():
     input_warning = False
     showing_reply = False
     reply_data = None
+    global inactivity_confirmation, confirmation_deadline
+    global confirmation_alert_started, next_confirmation_alert
+    inactivity_confirmation = False
+    confirmation_deadline = None
+    confirmation_alert_started = None
+    next_confirmation_alert = None
     with open("./data/updated_dialogue.json", "r", encoding="utf-8") as f:
         dialogue_data = json.load(f)
 
@@ -289,6 +327,16 @@ while running:
             running = False
 
         elif event.type == pygame.KEYDOWN:
+            if inactivity_confirmation:
+                if event.key == pygame.K_RETURN:
+                    inactivity_confirmation = False
+                    confirmation_deadline = None
+                    confirmation_alert_started = None
+                    next_confirmation_alert = None
+                    last_input_time = time.time()
+                    current_character = len(full_text)
+                continue
+
             last_input_time = time.time()  # Reset idle timer on any key press
             # skip to end of text on ENTER
             if current_character < len(full_text):
@@ -423,6 +471,50 @@ while running:
                         input_text += char
                         input_warning = False  # Clear warning when user types
 
+    if inactivity_confirmation:
+        alert_now = time.time()
+        if alert_now >= next_confirmation_alert:
+            confirmation_alert_started = alert_now
+            next_confirmation_alert += CONFIRMATION_ALERT_INTERVAL
+        alert_elapsed = alert_now - confirmation_alert_started
+        alert_active = 0 <= alert_elapsed < CONFIRMATION_ALERT_DURATION
+        pulse_amount = 0.0
+        if alert_active and alert_elapsed < 4.0:
+            pulse_progress = (alert_elapsed % 2.0) / 2.0
+            pulse_amount = (1 - abs(2 * pulse_progress - 1))
+        confirmation_background = blend_colors(BACKGROUND, TEXT, pulse_amount)
+        confirmation_text = blend_colors(TEXT, BACKGROUND, pulse_amount)
+        confirmation_highlight = blend_colors(HIGHLIGHT, BACKGROUND, pulse_amount)
+        confirmation_instruction = blend_colors(INSTRUCTION, BACKGROUND, pulse_amount)
+        seconds_remaining = max(0, int(confirmation_deadline - time.time()) + 1)
+        screen.fill(confirmation_background)
+        confirmation_y = draw_text(
+            screen,
+            "Are you still here?",
+            30,
+            60,
+            font,
+            confirmation_text,
+            SCREEN_WIDTH - 60,
+        )
+        confirmation_y = draw_text(
+            screen,
+            f"Restarting in {seconds_remaining} seconds.",
+            30,
+            confirmation_y + 10,
+            font,
+            confirmation_text,
+            SCREEN_WIDTH - 60,
+        )
+        draw_text(
+            screen,
+            "> Yes [press Enter]",
+            30,
+            confirmation_y + 25,
+            instruction_font,
+            confirmation_highlight,
+            SCREEN_WIDTH - 60,
+        )
     pygame.display.flip()
     clock.tick(FPS)
 
