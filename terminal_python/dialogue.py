@@ -1,525 +1,182 @@
-import pygame
+# Runs the main Pygame dialogue application and coordinates its components.
 import json
 import sys
-import os
-import platform
 import time
 
-# Loading JSON
-with open("./data/updated_dialogue.json", "r", encoding="utf-8") as f:
-    dialogue_data = json.load(f)
+import pygame
 
-# Settings
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 480
-FPS = 30
-INPUT_FILE = "/tmp/input.txt"
+try:
+    from . import config, hardware, inactivity, message_store, renderer, theme
+except ImportError:
+    from pathlib import Path
 
-# check if running on Raspberry Pi
-is_raspberry_pi = platform.system() == "Linux" and os.uname().machine.startswith("aarch64")
-print(platform.system())
-print(os.uname().machine)
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from terminal_python import config, hardware, inactivity, message_store, renderer, theme
 
-if is_raspberry_pi:
-    import RPi.GPIO as GPIO   
-    # GPIO pin number (BCM numbering)
-    SWITCH_PIN = 4
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    print("Running on Raspberry Pi")
-    print(f"Listening for GPIO {SWITCH_PIN} (physical pin 7) connected to GND...")
 
-# Initialize pygame
-pygame.init()
-if is_raspberry_pi:
-    pygame.mouse.set_visible(False)
+def main() -> None:
+    with config.DIALOGUE_PATH.open("r", encoding="utf-8") as dialogue_file:
+        dialogue_data = json.load(dialogue_file)
 
-# Idle timeout settings
-IDLE_TIMEOUT = 120  # 2 minutes
-CONFIRMATION_TIMEOUT = 45
-CONFIRMATION_ALERT_DURATION = 6
-CONFIRMATION_ALERT_INTERVAL = 15
-last_input_time = time.time()  # Initialize to current time
-inactivity_confirmation = False
-confirmation_deadline = None
-confirmation_alert_started = None
-next_confirmation_alert = None
-
-flags = pygame.FULLSCREEN if is_raspberry_pi else 0
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
-pygame.display.set_caption("Dialogue UI")
-clock = pygame.time.Clock()
-
-# Typing animation
-string_index = 0
-current_character = 0
-
-# Typing time counter
-last_char_time = time.time()
-
-# State
-showing_reply = False
-reply_data = None
-current_prompt = 0
-current_character = 0
-input_text = ""
-selected_option = 0
-show_cursor = True
-last_cursor_switch = time.time()
-cursor_interval = 0.5
-cursor_bob_interval = 0.45
-cursor_bob_offset = -1
-last_cursor_bob_switch = time.time()
-user_name = ""
-input_warning = False
-last_gpio_state = None
-
-# Colors
-WHITE = pygame.Color("#ffffff")
-BLACK = pygame.Color("#141414")
-GRAY = pygame.Color("#5faa46")
-HIGHLIGHT = pygame.Color("#ffff00") # fluorescent yellow
-BACKGROUND = pygame.Color("#192008") # dark yellowish green
-TEXT = pygame.Color("#ebff00") # contrasting fluorescent yellow
-INSTRUCTION = pygame.Color("#99a700") # green, replacing the former blue instructions
-
-def blend_colors(start, end, amount):
-    amount = max(0.0, min(1.0, amount))
-    return pygame.Color(
-        round(start.r + (end.r - start.r) * amount),
-        round(start.g + (end.g - start.g) * amount),
-        round(start.b + (end.b - start.b) * amount),
+    charger = hardware.ChargingSwitch()
+    pygame.init()
+    if charger.is_raspberry_pi:
+        pygame.mouse.set_visible(False)
+    fonts = theme.load_fonts()
+    screen = pygame.display.set_mode(
+        (config.SCREEN_WIDTH, config.SCREEN_HEIGHT),
+        pygame.FULLSCREEN if charger.is_raspberry_pi else 0,
     )
-
-# Load font
-FONT_PATH = "./assets/PPMondwest-Regular.otf"
-INSTRUCTION_FONT_PATH = "./assets/PPNeueBit-Bold.otf"
-font = pygame.font.Font(FONT_PATH, 40)
-instruction_font = pygame.font.Font(FONT_PATH, 34)
-cursor_font = pygame.font.Font(FONT_PATH, 32)
-# font = pygame.font.SysFont("monospace", 24)
-
-# Wrap lines to fit screen
-def draw_text(surface, text, x, y, font, color, max_width):
-    words = text.split(' ')
-    line = ""
-    y_offset = 0
-    for word in words:
-        test_line = f"{line} {word}".strip()
-        test_width, _ = font.size(test_line)
-        if test_width > max_width:
-            rendered = font.render(line, False, color)
-            surface.blit(rendered, (x, y + y_offset))
-            y_offset += font.get_height()
-            line = word
-        else:
-            line = test_line
-    rendered = font.render(line, False, color)
-    surface.blit(rendered, (x, y + y_offset))
-    return y + y_offset + font.get_height()
-
-def get_text_end_position(text, x, y, font, max_width):
-    words = text.split(' ')
-    line = ""
-    y_offset = 0
-    for word in words:
-        test_line = f"{line} {word}".strip()
-        test_width, _ = font.size(test_line)
-        if test_width > max_width:
-            y_offset += font.get_height()
-            line = word
-        else:
-            line = test_line
-    line_width, _ = font.size(line)
-    return x + line_width, y + y_offset
-
-def draw_message_cursor(surface, text, x, y, font, color, max_width, offset):
-    end_x, end_y = get_text_end_position(text, x, y, font, max_width)
-    space_width, _ = font.size(" ")
-    cursor_surface = cursor_font.render("∇", False, color)
-    surface.blit(cursor_surface, (end_x + space_width, end_y + offset))
-
-def show_popup(screen, font, message):
-    popup_width, popup_height = 600, 300
-    screen_width, screen_height = screen.get_size()
-    popup_x = (screen_width - popup_width) // 2
-    popup_y = (screen_height - popup_height) // 2
-
-    # Draw popup background
-    pygame.draw.rect(screen, BACKGROUND, (popup_x, popup_y, popup_width, popup_height))
-    pygame.draw.rect(screen, INSTRUCTION, (popup_x, popup_y, popup_width, popup_height), 2)  # Border
-
-    # Render and draw text
-    text_surface = instruction_font.render(message, True, TEXT)
-    text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
-    screen.blit(text_surface, text_rect)
-
-def check_idle_timeout():
-    global last_input_time, inactivity_confirmation, confirmation_deadline
-    global confirmation_alert_started, next_confirmation_alert
-    now = time.time()
-    if current_prompt == 0:
-        # The initial "Sleeping..." prompt is intentionally never interrupted.
-        last_input_time = now
-        return
-    if inactivity_confirmation:
-        if now >= confirmation_deadline:
-            print("Inactivity confirmation expired. Restarting...")
-            restart()
-            inactivity_confirmation = False
-            confirmation_deadline = None
-            confirmation_alert_started = None
-            next_confirmation_alert = None
-            last_input_time = now
-    elif now - last_input_time > IDLE_TIMEOUT:
-        print("Inactivity timeout reached. Showing confirmation...")
-        inactivity_confirmation = True
-        confirmation_deadline = now + CONFIRMATION_TIMEOUT
-        confirmation_alert_started = now
-        next_confirmation_alert = now + CONFIRMATION_ALERT_INTERVAL
-
-
-# user name
-def substitute_vars(text):
-    return text.replace("[name]", user_name)
-
-def restart():
-    global current_prompt, current_character, selected_option
-    global input_text, user_name, input_warning
-    global showing_reply, reply_data, dialogue_data
+    pygame.display.set_caption("Dialogue UI")
+    clock = pygame.time.Clock()
+    idle = inactivity.InactivityController.create()
 
     current_prompt = 0
     current_character = 0
-    selected_option = 0
     input_text = ""
+    selected_option = 0
     user_name = ""
     input_warning = False
-    showing_reply = False
-    reply_data = None
-    global inactivity_confirmation, confirmation_deadline
-    global confirmation_alert_started, next_confirmation_alert
-    inactivity_confirmation = False
-    confirmation_deadline = None
-    confirmation_alert_started = None
-    next_confirmation_alert = None
-    with open("./data/updated_dialogue.json", "r", encoding="utf-8") as f:
-        dialogue_data = json.load(f)
+    cursor_bob_offset = -1
+    last_cursor_bob = time.time()
+    last_character_time = time.time()
+    last_gpio_state = None
+    running = True
 
+    try:
+        while running:
+            now = time.time()
+            screen.fill(theme.BACKGROUND)
+            idle_result = idle.update(current_prompt, now)
+            if idle_result == "restart":
+                current_prompt = 0
+                current_character = 0
+                selected_option = 0
+                input_text = ""
+                user_name = ""
+                input_warning = False
+                with config.DIALOGUE_PATH.open("r", encoding="utf-8") as dialogue_file:
+                    dialogue_data = json.load(dialogue_file)
 
-# Main loop
-running = True
-while running:
-    screen.fill(BACKGROUND)
-    check_idle_timeout()
+            last_gpio_state = charger.report_change(last_gpio_state)
+            if current_prompt >= len(dialogue_data["dialogue"]):
+                current_prompt = 0
 
-    # Report changes on the charging-status input without flooding the console.
-    if is_raspberry_pi:
-        gpio_state = GPIO.input(SWITCH_PIN)
-        if gpio_state != last_gpio_state:
-            connection_status = "CONNECTED to GND" if gpio_state == GPIO.LOW else "not connected"
-            print(f"GPIO {SWITCH_PIN}: {connection_status}", flush=True)
-            last_gpio_state = gpio_state
+            prompt = dialogue_data["dialogue"][current_prompt]
+            prompt_text = prompt["text"].replace("[name]", user_name)
+            full_text = prompt_text + " ∇"
+            display_text = full_text[:current_character]
+            text_color = theme.HIGHLIGHT if prompt.get("highlighted", False) else theme.TEXT
+            completed = current_character >= len(full_text)
+            y = renderer.draw_text(
+                screen,
+                prompt_text if completed else display_text,
+                30,
+                60,
+                fonts[0],
+                text_color,
+                config.SCREEN_WIDTH - 60,
+            )
 
-    # reset logic
-    if current_prompt >= len(dialogue_data["dialogue"]):
-        restart()
-
-    prompt = dialogue_data["dialogue"][current_prompt]
-    prompt_text = substitute_vars(prompt["text"]) # substitute name if present
-    prompt_type = prompt["type"]
-    highlight = prompt.get("highlighted", "no") == "yes" # check if highlighted
-
-    # Display prompt text with typing effect
-    full_text = prompt_text + " ∇"
-    display_text = full_text[:current_character] # show text up to current character
-    text_color = HIGHLIGHT if highlight else TEXT
-    instruction_color = INSTRUCTION
-    completed_message = current_character >= len(full_text)
-    text_to_draw = prompt_text if completed_message else display_text
-    y_offset = draw_text(screen, text_to_draw, 30, 60, font, text_color, SCREEN_WIDTH - 60)  
-
-    # access the prompt["pace"] and make a multiplier
-    if prompt["pace"] == "slow":
-        delay_normal = 0.1  
-        delay_comma = 0.8       
-        delay_period = 1.2 
-        delay_space = 0.2
-    else:
-        delay_normal = 0.001  
-        delay_comma = 0.3       
-        delay_period = 0.6 
-        delay_space = 0.05 
-
-    now = time.time()
-    if completed_message:
-        if now - last_cursor_bob_switch > cursor_bob_interval:
-            cursor_bob_offset = 2 if cursor_bob_offset == -1 else -1
-            last_cursor_bob_switch = now
-        draw_message_cursor(screen, prompt_text, 30, 60, font, text_color, SCREEN_WIDTH - 60, cursor_bob_offset)
-    else:
-        # Start each newly typed message at the upper cursor position.
-        cursor_bob_offset = -1
-        last_cursor_bob_switch = now
-
-    if current_character < len(full_text):
-        prev_char = full_text[current_character - 1] if current_character > 0 else ''
-        # set delays so it loolks cute
-        delay = delay_normal
-        if prev_char in {'.', '?'}:
-            delay = delay_period
-        elif prev_char == ',':
-            delay = delay_comma
-        elif prev_char == ' ':
-            delay = delay_space
-
-        if now - last_char_time > delay:
-            current_character += 1
-            last_char_time = now
-    else:
-        if prompt_type == "multiple_choice":
-            if showing_reply and reply_data:
-                reply_text = substitute_vars(reply_data[0]["text"])
-                display_reply = reply_text[:current_character]
-                y_offset = draw_text(screen, display_reply, 30, y_offset + 20, instruction_font, TEXT, SCREEN_WIDTH - 60)
-            else:
-                y_offset += 20
-                for i, option in enumerate(prompt["options"]):
-                    option_text = option["label"]
-                    color = HIGHLIGHT if i == selected_option else GRAY
-                    draw_text(screen, f"> {option_text}", 30, y_offset, instruction_font, color, SCREEN_WIDTH - 60)
-                    y_offset += instruction_font.get_height()
-                color = INSTRUCTION
-                helper_text = "Use the Arrows (↑↓) to select. Press Enter to confirm your answer."
-                draw_text(screen, helper_text, 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
-
-        elif prompt_type == "text_input":
-            if input_text:
-                input_display_text = input_text
-                color = TEXT
-            elif input_warning:
-                input_display_text = "Type something to continue, then press Enter."
-                color = INSTRUCTION
-            else:
-                input_display_text = "Type your answer here, then press Enter."
-                color = INSTRUCTION
-
-            cursor = "|" if show_cursor else ""
-            draw_text(screen, f"> {input_display_text}{cursor}", 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
-
-        # make this elif into if there's an instruction, display it
-        elif prompt_type == "sentence" :
-            instruction = prompt.get("instruction")
-            if instruction:
-                helper_text = instruction
-                color = INSTRUCTION
-                draw_text(screen, helper_text, 30, y_offset + 20, instruction_font, color, SCREEN_WIDTH - 60)
-
-
-
-    # Cursor blink
-    if now - last_cursor_switch > cursor_interval:
-        show_cursor = not show_cursor
-        last_cursor_switch = now
-
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        elif event.type == pygame.KEYDOWN:
-            if inactivity_confirmation:
-                if event.key == pygame.K_RETURN:
-                    inactivity_confirmation = False
-                    confirmation_deadline = None
-                    confirmation_alert_started = None
-                    next_confirmation_alert = None
-                    last_input_time = time.time()
-                    current_character = len(full_text)
-                continue
-
-            last_input_time = time.time()  # Reset idle timer on any key press
-            # skip to end of text on ENTER
+            pace = prompt.get("pace", "normal")
+            delay = 0.1 if pace == "slow" else 0.001
             if current_character < len(full_text):
-                if event.key == pygame.K_RETURN:
-                    current_character = len(full_text)  
-                continue
+                previous = full_text[current_character - 1] if current_character else ""
+                delay = {" ": 0.2 if pace == "slow" else 0.05, ",": 0.8 if pace == "slow" else 0.3, ".": 1.2 if pace == "slow" else 0.6, "?": 1.2 if pace == "slow" else 0.6}.get(previous, delay)
+                if now - last_character_time > delay:
+                    current_character += 1
+                    last_character_time = now
+            elif now - last_cursor_bob > 0.45:
+                cursor_bob_offset = 2 if cursor_bob_offset == -1 else -1
+                last_cursor_bob = now
 
-            elif prompt_type == "sentence" or prompt_type == "restart":
-                if event.key == pygame.K_RETURN:
-                    if prompt_type == "restart":
-                        restart()
-                    else:
-                        current_prompt += 1
+            if completed:
+                renderer.draw_message_cursor(screen, prompt_text, 30, 60, fonts[0], text_color, config.SCREEN_WIDTH - 60, cursor_bob_offset, fonts[2])
+                if prompt["type"] == "multiple_choice":
+                    y += 20
+                    for index, option in enumerate(prompt["options"]):
+                        color = theme.HIGHLIGHT if index == selected_option else theme.GRAY
+                        renderer.draw_text(screen, f"> {option['label']}", 30, y, fonts[1], color, config.SCREEN_WIDTH - 60)
+                        y += fonts[1].get_height()
+                    renderer.draw_text(screen, "Use the Arrows (↑↓) to select. Press Enter to confirm your answer.", 30, y + 20, fonts[1], theme.INSTRUCTION, config.SCREEN_WIDTH - 60)
+                elif prompt["type"] == "text_input":
+                    text = input_text or ("Type something to continue, then press Enter." if input_warning else "Type your answer here, then press Enter.")
+                    color = theme.TEXT if input_text else theme.INSTRUCTION
+                    renderer.draw_text(screen, f"> {text}", 30, y + 20, fonts[1], color, config.SCREEN_WIDTH - 60)
+                elif prompt.get("instruction"):
+                    renderer.draw_text(screen, prompt["instruction"], 30, y + 20, fonts[1], theme.INSTRUCTION, config.SCREEN_WIDTH - 60)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if idle.confirmation_active:
+                        if event.key == pygame.K_RETURN:
+                            idle.confirm_presence(time.time())
+                            current_character = len(full_text)
+                        continue
+                    idle.register_input(time.time())
+                    if current_character < len(full_text):
+                        if event.key == pygame.K_RETURN:
+                            current_character = len(full_text)
+                        continue
+                    if prompt["type"] in {"sentence", "restart"} and event.key == pygame.K_RETURN:
+                        if prompt["type"] == "restart":
+                            current_prompt = 0
+                        else:
+                            current_prompt += 1
                         current_character = 0
-
-            # multiple choice handling
-            elif prompt_type == "multiple_choice":
-                if event.key == pygame.K_UP:
-                    selected_option = (selected_option - 1) % len(prompt["options"])
-                elif event.key == pygame.K_DOWN:
-                    selected_option = (selected_option + 1) % len(prompt["options"])
-                elif event.key == pygame.K_RETURN:
-                    # first check if reply is skip
-                    if prompt["options"][selected_option]["reply"] == "[skip]":
-                        # Skip to next prompt
-                        current_prompt += 1
-                        current_character = 0
-                        selected_option = 0
-
-                    # Otherwise, get the reply text
-                    else:
-                        reply_obj = prompt["options"][selected_option]["reply"][0]
-                        reply_text = substitute_vars(reply_obj["text"])
-                        reply_type = reply_obj.get("type", "sentence")
-
-                        # Inject reply as a temporary prompt and delay moving forward
-                        dialogue_data["dialogue"].insert(current_prompt + 1, {
-                            "type": reply_type,
-                            "text": reply_text,
-                            "highlighted": str(reply_obj.get("highlighted", False)).lower(),
-                            "pace": str(reply_obj.get("pace", "normal")).lower()
-                        })
-
-                        current_prompt += 1
-                        current_character = 0
-                        selected_option = 0
- 
-            # text input handling
-            elif prompt_type == "text_input":
-                if event.key == pygame.K_RETURN:
-                        
-                    if input_text.strip() == "":
-                        input_warning = True  # Trigger the special placeholder
-                    else:
-                        input_type = prompt.get("input_type")
-                        if input_type == "name":
-                            user_name = input_text.strip()
-
-                        elif input_type == "message":
-                            user_message = input_text.strip()
-
-                            #add character limit
-                            new_message = {
-                                "name": user_name,
-                                "message": user_message,
-                                "timestamp": time.strftime("%d-%m-%Y %H:%M:%S")
-                            }
-
-                            print(new_message)
-
-                            new_message_path = "./data/user_messages.json"
-                            temp_message_path = "./data/user_messages.json.tmp"
-
-                            if os.path.exists(new_message_path):
-                                with open(new_message_path, "r") as infile:
-                                    try:
-                                        messages = json.load(infile)
-                                        if not isinstance(messages, list):
-                                            messages = []
-                                    except json.JSONDecodeError:
-                                        messages = []
+                    elif prompt["type"] == "multiple_choice":
+                        if event.key == pygame.K_UP:
+                            selected_option = (selected_option - 1) % len(prompt["options"])
+                        elif event.key == pygame.K_DOWN:
+                            selected_option = (selected_option + 1) % len(prompt["options"])
+                        elif event.key == pygame.K_RETURN:
+                            reply = prompt["options"][selected_option]["reply"]
+                            if reply == "[skip]":
+                                current_prompt += 1
                             else:
-                                messages = []
-                            
-                            # Append new message
-                            messages.append(new_message)
-
-                            # Check if mud has charged enough
-                            if is_raspberry_pi:
-                                is_charged = False
-                                # start fallback timer if mud doesn't charge in 3 minutes
-                                fallback_timer = time.time() + 180  # 3 minutes from now
-                                try:
-
-                                    while not is_charged and time.time() < fallback_timer:
-                                        # current_prompt += 1
-                                        # current_character = 0
-                                        input_state = GPIO.input(SWITCH_PIN)
-                                        if input_state == GPIO.LOW:
-                                            print("Mud is charged!")
-                                            is_charged = True
-                                            # popup goes away
-                                        else:
-                                            #popup message saying mud is not charged
-                                            print("Mud is not charged yet, waiting...")
-                                            show_popup(screen, font, "The mud is charging... It will wake up at 3.5V")
+                                reply_obj = reply[0]
+                                dialogue_data["dialogue"].insert(current_prompt + 1, {"type": reply_obj.get("type", "sentence"), "text": reply_obj["text"].replace("[name]", user_name), "highlighted": reply_obj.get("highlighted", False), "pace": reply_obj.get("pace", "normal")})
+                                current_prompt += 1
+                            current_character = 0
+                            selected_option = 0
+                    elif prompt["type"] == "text_input":
+                        if event.key == pygame.K_BACKSPACE:
+                            input_text = input_text[:-1]
+                        elif event.key == pygame.K_RETURN:
+                            if not input_text.strip():
+                                input_warning = True
+                            else:
+                                input_type = prompt.get("input_type")
+                                if input_type == "name":
+                                    user_name = input_text.strip()
+                                elif input_type == "message":
+                                    message_store.append_message(config.MESSAGE_PATH, user_name, input_text.strip())
+                                    if charger.is_raspberry_pi:
+                                        deadline = time.time() + 180
+                                        while not charger.is_charged() and time.time() < deadline:
+                                            renderer.draw_charging_popup(screen, "The mud is charging... It will wake up at 3.5V", fonts[1])
                                             pygame.display.flip()
                                             time.sleep(0.25)
+                                input_text = ""
+                                input_warning = False
+                                current_prompt += 1
+                                current_character = 0
+                        elif event.unicode.isprintable():
+                            input_text += event.unicode
+                            input_warning = False
+
+            if idle.confirmation_active:
+                renderer.draw_confirmation_screen(screen, idle.seconds_remaining(time.time()), idle.pulse_amount(time.time()), fonts)
+            pygame.display.flip()
+            clock.tick(config.FPS)
+    finally:
+        pygame.quit()
+        if charger.is_raspberry_pi:
+            pygame.mouse.set_visible(True)
+        charger.cleanup()
 
 
-                                except KeyboardInterrupt:
-                                    print("\nExiting...")
-
-                            # Write to temp file if mud is charged or if it has been more than 3 minutes since user submitted
-                            with open(temp_message_path, "w") as tmpfile:
-                                json.dump(messages, tmpfile, indent=4)
-                                tmpfile.flush()
-                                os.fsync(tmpfile.fileno())
-
-                            os.replace(temp_message_path, new_message_path)
-
-                        input_text = ""
-                        current_prompt += 1
-                        current_character = 0
-                        input_warning = False  # Reset warning on valid input
-
-                elif event.key == pygame.K_BACKSPACE:
-                    input_text = input_text[:-1]
-                else:
-                    char = event.unicode
-                    if char.isprintable():
-                        input_text += char
-                        input_warning = False  # Clear warning when user types
-
-    if inactivity_confirmation:
-        alert_now = time.time()
-        if alert_now >= next_confirmation_alert:
-            confirmation_alert_started = alert_now
-            next_confirmation_alert += CONFIRMATION_ALERT_INTERVAL
-        alert_elapsed = alert_now - confirmation_alert_started
-        alert_active = 0 <= alert_elapsed < CONFIRMATION_ALERT_DURATION
-        pulse_amount = 0.0
-        if alert_active and alert_elapsed < 4.0:
-            pulse_progress = (alert_elapsed % 2.0) / 2.0
-            pulse_amount = (1 - abs(2 * pulse_progress - 1))
-        confirmation_background = blend_colors(BACKGROUND, TEXT, pulse_amount)
-        confirmation_text = blend_colors(TEXT, BACKGROUND, pulse_amount)
-        confirmation_highlight = blend_colors(HIGHLIGHT, BACKGROUND, pulse_amount)
-        confirmation_instruction = blend_colors(INSTRUCTION, BACKGROUND, pulse_amount)
-        seconds_remaining = max(0, int(confirmation_deadline - time.time()) + 1)
-        screen.fill(confirmation_background)
-        confirmation_y = draw_text(
-            screen,
-            "Are you still here?",
-            30,
-            60,
-            font,
-            confirmation_text,
-            SCREEN_WIDTH - 60,
-        )
-        confirmation_y = draw_text(
-            screen,
-            f"Restarting in {seconds_remaining} seconds.",
-            30,
-            confirmation_y + 10,
-            font,
-            confirmation_text,
-            SCREEN_WIDTH - 60,
-        )
-        draw_text(
-            screen,
-            "> Yes [press Enter]",
-            30,
-            confirmation_y + 25,
-            instruction_font,
-            confirmation_highlight,
-            SCREEN_WIDTH - 60,
-        )
-    pygame.display.flip()
-    clock.tick(FPS)
-
-pygame.quit()
-if is_raspberry_pi:
-    pygame.mouse.set_visible(True)
-    GPIO.cleanup()
-sys.exit()
+if __name__ == "__main__":
+    main()
