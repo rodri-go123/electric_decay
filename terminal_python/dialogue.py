@@ -58,6 +58,9 @@ selected_option = 0
 show_cursor = True
 last_cursor_switch = time.time()
 cursor_interval = 0.5
+cursor_bob_interval = 0.45
+cursor_bob_offset = -1
+last_cursor_bob_switch = time.time()
 user_name = ""
 input_warning = False
 last_gpio_state = None
@@ -76,6 +79,7 @@ FONT_PATH = "./assets/PPMondwest-Regular.otf"
 INSTRUCTION_FONT_PATH = "./assets/PPNeueBit-Bold.otf"
 font = pygame.font.Font(FONT_PATH, 40)
 instruction_font = pygame.font.Font(FONT_PATH, 34)
+cursor_font = pygame.font.Font(FONT_PATH, 32)
 # font = pygame.font.SysFont("monospace", 24)
 
 # Wrap lines to fit screen
@@ -96,6 +100,27 @@ def draw_text(surface, text, x, y, font, color, max_width):
     rendered = font.render(line, False, color)
     surface.blit(rendered, (x, y + y_offset))
     return y + y_offset + font.get_height()
+
+def get_text_end_position(text, x, y, font, max_width):
+    words = text.split(' ')
+    line = ""
+    y_offset = 0
+    for word in words:
+        test_line = f"{line} {word}".strip()
+        test_width, _ = font.size(test_line)
+        if test_width > max_width:
+            y_offset += font.get_height()
+            line = word
+        else:
+            line = test_line
+    line_width, _ = font.size(line)
+    return x + line_width, y + y_offset
+
+def draw_message_cursor(surface, text, x, y, font, color, max_width, offset):
+    end_x, end_y = get_text_end_position(text, x, y, font, max_width)
+    space_width, _ = font.size(" ")
+    cursor_surface = cursor_font.render("∇", False, color)
+    surface.blit(cursor_surface, (end_x + space_width, end_y + offset))
 
 def show_popup(screen, font, message):
     popup_width, popup_height = 600, 300
@@ -169,7 +194,9 @@ while running:
     display_text = full_text[:current_character] # show text up to current character
     text_color = HIGHLIGHT if highlight else TEXT
     instruction_color = INSTRUCTION
-    y_offset = draw_text(screen, display_text, 30, 60, font, text_color, SCREEN_WIDTH - 60)  
+    completed_message = current_character >= len(full_text)
+    text_to_draw = prompt_text if completed_message else display_text
+    y_offset = draw_text(screen, text_to_draw, 30, 60, font, text_color, SCREEN_WIDTH - 60)  
 
     # access the prompt["pace"] and make a multiplier
     if prompt["pace"] == "slow":
@@ -184,6 +211,16 @@ while running:
         delay_space = 0.05 
 
     now = time.time()
+    if completed_message:
+        if now - last_cursor_bob_switch > cursor_bob_interval:
+            cursor_bob_offset = 2 if cursor_bob_offset == -1 else -1
+            last_cursor_bob_switch = now
+        draw_message_cursor(screen, prompt_text, 30, 60, font, text_color, SCREEN_WIDTH - 60, cursor_bob_offset)
+    else:
+        # Start each newly typed message at the upper cursor position.
+        cursor_bob_offset = -1
+        last_cursor_bob_switch = now
+
     if current_character < len(full_text):
         prev_char = full_text[current_character - 1] if current_character > 0 else ''
         # set delays so it loolks cute
